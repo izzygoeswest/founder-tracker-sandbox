@@ -6,8 +6,6 @@ export default function EditEntrepreneur() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
-
   const [formData, setFormData] = useState({
     name: '',
     business: '',
@@ -17,8 +15,10 @@ export default function EditEntrepreneur() {
     initials: '',
     notes: '',
     confirmed: false,
-    stage: 'Ideation'
+    stage: 'Ideation',
   });
+
+  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
 
   useEffect(() => {
     const fetchEntrepreneur = async () => {
@@ -45,15 +45,15 @@ export default function EditEntrepreneur() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleStageClick = (selectedStage) => {
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       stage: selectedStage,
     }));
   };
@@ -71,7 +71,7 @@ export default function EditEntrepreneur() {
       console.error('Update error:', error.message);
       alert(`Update failed: ${error.message}`);
     } else {
-      alert('Record updated successfully!');
+      alert('Entrepreneur updated successfully!');
       navigate('/entrepreneurs');
     }
   };
@@ -144,11 +144,10 @@ export default function EditEntrepreneur() {
           placeholder="Notes"
           value={formData.notes}
           onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
           rows="4"
+          className="w-full p-2 border rounded text-black"
         />
 
-        {/* Partner Confirmed Checkbox */}
         <label className="flex items-center space-x-2 text-gray-800">
           <input
             type="checkbox"
@@ -160,17 +159,17 @@ export default function EditEntrepreneur() {
           <span>Partner Confirmed</span>
         </label>
 
-        {/* Progress Tracker */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Editable Stage Buttons */}
+        <div className="space-x-2 flex flex-wrap">
           {stages.map((stage) => (
             <button
-              type="button"
               key={stage}
+              type="button"
               onClick={() => handleStageClick(stage)}
-              className={`px-2 py-1 rounded-full text-sm font-semibold transition ${
+              className={`px-3 py-1 rounded-full font-semibold transition text-sm ${
                 formData.stage === stage
                   ? 'bg-green-600 text-white'
-                  : 'bg-gray-600 text-gray-300'
+                  : 'bg-gray-500 text-white'
               }`}
             >
               {stage}
