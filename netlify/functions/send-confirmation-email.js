@@ -7,11 +7,17 @@ exports.handler = async function (event) {
 
   try {
     const { email, token } = JSON.parse(event.body);
+
+    // Debug: log what's coming in
+    console.log("Incoming email:", email);
+    console.log("Incoming token:", token);
+
     if (!email || !token) {
       return { statusCode: 400, body: 'Missing email or token' };
     }
 
     const confirmationUrl = `${process.env.FRONTEND_URL}/confirm-email?token=${token}`;
+    console.log("Confirmation URL:", confirmationUrl);
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -38,7 +44,7 @@ exports.handler = async function (event) {
       body: JSON.stringify({ message: 'Email sent' }),
     };
   } catch (err) {
-    console.error('Error sending email:', err);
+    console.error('🔥 ERROR SENDING EMAIL:', err); // This will show in Netlify logs
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to send email' }),
