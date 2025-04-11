@@ -13,7 +13,7 @@ import {
   PointElement,
   LineElement
 } from 'chart.js';
-import ProgressBar from '../components/ProgressBar';
+import ProgressBar from './ProgressBar'; // 👈 Import ProgressBar
 
 ChartJS.register(
   ArcElement,
@@ -32,9 +32,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchEntrepreneurs = async () => {
-      const { data, error } = await supabase
-        .from('entrepreneurs')
-        .select('*');
+      const { data, error } = await supabase.from('entrepreneurs').select('*');
       if (!error) setEntrepreneurs(data);
     };
 
@@ -43,34 +41,19 @@ const Dashboard = () => {
 
   const totalEntrepreneurs = entrepreneurs.length;
 
-  const businessTypes = {
-    Startup: 0,
-    Established: 0,
-    Ideation: 0,
-  };
-
-  entrepreneurs.forEach((e) => {
-    if (e.type && businessTypes.hasOwnProperty(e.type)) {
-      businessTypes[e.type]++;
-    }
-  });
+  const businessTypes = entrepreneurs.reduce((acc, e) => {
+    acc[e.type] = (acc[e.type] || 0) + 1;
+    return acc;
+  }, {});
 
   const businessTypeStats = Object.entries(businessTypes).map(([type, count]) => ({
     type,
-    percentage: totalEntrepreneurs > 0 ? ((count / totalEntrepreneurs) * 100).toFixed(0) : 0,
+    percentage: ((count / totalEntrepreneurs) * 100).toFixed(0),
   }));
 
   const recentEntrepreneurs = [...entrepreneurs]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 7);
-
-  const partnerReferrals = entrepreneurs.reduce((acc, e) => {
-    if (e.referred) {
-      acc[e.referred] = (acc[e.referred] || 0) + 1;
-    }
-    return acc;
-  }, {});
-  const totalPartnerReferrals = Object.values(partnerReferrals).reduce((sum, count) => sum + count, 0);
 
   const barData = {
     labels: ['Monthly Trends'],
@@ -120,7 +103,7 @@ const Dashboard = () => {
         </div>
         <div className="bg-gray-800 p-4 rounded shadow">
           <h2 className="text-sm font-semibold">Partner Referrals</h2>
-          <p className="text-2xl">{totalPartnerReferrals}</p>
+          <p className="text-2xl">{totalEntrepreneurs}</p>
           <p className="text-xs text-gray-400">This month</p>
         </div>
       </div>
@@ -134,22 +117,18 @@ const Dashboard = () => {
               <th className="p-2">Entrepreneur</th>
               <th className="p-2">Action</th>
               <th className="p-2">Partner</th>
-              <th className="p-2">Progress</th>
+              <th className="p-2">Progress</th> {/* 👈 New column */}
             </tr>
           </thead>
           <tbody>
             {recentEntrepreneurs.map((e, i) => (
               <tr key={i} className="border-t border-gray-700">
-                <td className="p-2">
-                  {e.created_at && !isNaN(new Date(e.created_at))
-                    ? new Date(e.created_at).toLocaleDateString()
-                    : '—'}
-                </td>
-                <td className="p-2 font-semibold">{e.name || '—'}</td>
+                <td className="p-2">{new Date(e.created_at).toDateString()}</td>
+                <td className="p-2 font-semibold">{e.name}</td>
                 <td className="p-2">
                   <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Added</span>
                 </td>
-                <td className="p-2">{e.referred || '—'}</td>
+                <td className="p-2">{e.referred}</td>
                 <td className="p-2">
                   <ProgressBar currentStage={e.stage} />
                 </td>
