@@ -1,3 +1,5 @@
+import React from 'react';
+
 const ProgressBar = ({ currentStage }) => {
   const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
   const currentIndex = stages.indexOf(currentStage);
@@ -7,13 +9,13 @@ const ProgressBar = ({ currentStage }) => {
       {stages.map((stage, i) => (
         <span
           key={stage}
-          className={px-2 py-1 rounded-full text-xs font-semibold transition ${
+          className={`px-2 py-1 rounded-full text-xs font-semibold transition ${
             i < currentIndex
               ? 'bg-green-600 text-white'
               : i === currentIndex
               ? 'bg-blue-600 text-white'
               : 'bg-gray-600 text-gray-300'
-          }}
+          }`}
         >
           {stage}
         </span>
