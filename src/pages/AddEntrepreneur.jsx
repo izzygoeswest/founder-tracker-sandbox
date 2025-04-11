@@ -16,7 +16,7 @@ const AddEntrepreneur = () => {
     initials: '',
     confirmed: false,
     notes: '',
-    stage: 'Ideation'
+    stage: 'Ideation' // 👈 Default to first stage
   });
 
   const resourcePartners = [
@@ -29,7 +29,7 @@ const AddEntrepreneur = () => {
   ];
 
   const businessTypes = ['Ideation', 'Startup', 'Established'];
-  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
+  const stages = ['Ideation', 'Planning', 'Launch', 'Funding']; // 👈 Your 4-stage journey
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -117,7 +117,7 @@ const AddEntrepreneur = () => {
           className="w-full p-2 rounded text-black"
         >
           <option value="">Select Stage</option>
-          {stages.map(stage => (
+          {stages.map((stage) => (
             <option key={stage} value={stage}>{stage}</option>
           ))}
         </select>
