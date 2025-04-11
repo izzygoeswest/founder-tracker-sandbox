@@ -1,34 +1,41 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
+import { useAuth } from '../auth';
 
 const Entrepreneurs = () => {
   const [entrepreneurs, setEntrepreneurs] = useState([]);
   const [search, setSearch] = useState('');
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch entrepreneurs on component mount
   useEffect(() => {
     const fetchEntrepreneurs = async () => {
-      const { data, error } = await supabase.from('entrepreneurs').select('*');
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('entrepreneurs')
+        .select('*')
+        .eq('user_id', user.id);
+
       if (error) {
         console.error('Error fetching entrepreneurs:', error.message);
       } else {
         setEntrepreneurs(data);
       }
     };
-    fetchEntrepreneurs();
-  }, []);
 
-  // Live filter entrepreneurs by name or business
+    fetchEntrepreneurs();
+  }, [user]);
+
   const filtered = entrepreneurs.filter((e) =>
     e.name.toLowerCase().includes(search.toLowerCase()) ||
     e.business.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Export data to Excel
   const handleExport = () => {
     const ws = XLSX.utils.json_to_sheet(entrepreneurs);
     const wb = XLSX.utils.book_new();
@@ -36,7 +43,6 @@ const Entrepreneurs = () => {
     XLSX.writeFile(wb, 'entrepreneurs.xlsx');
   };
 
-  // Delete an entrepreneur record
   const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this entrepreneur?')) {
       const { error } = await supabase.from('entrepreneurs').delete().eq('id', id);
@@ -48,7 +54,6 @@ const Entrepreneurs = () => {
     }
   };
 
-  // Toggle the "Partner Confirmed" status
   const toggleConfirmed = async (ent) => {
     const updated = { ...ent, confirmed: !ent.confirmed };
     const { error } = await supabase
@@ -64,7 +69,6 @@ const Entrepreneurs = () => {
 
   return (
     <div className="p-6 space-y-4">
-      {/* Header and buttons */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Entrepreneurs</h2>
@@ -86,7 +90,6 @@ const Entrepreneurs = () => {
         </div>
       </div>
 
-      {/* Search input */}
       <div className="flex items-center space-x-2">
         <input
           type="text"
@@ -95,10 +98,8 @@ const Entrepreneurs = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="px-4 py-2 rounded w-full md:w-1/3 text-black"
         />
-        {/* Search button removed since filtering occurs live */}
       </div>
 
-      {/* Entrepreneurs table */}
       <div className="overflow-auto rounded border border-gray-700 mt-4">
         <table className="min-w-full bg-gray-800 text-white text-sm">
           <thead>
