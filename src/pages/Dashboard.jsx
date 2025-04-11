@@ -13,6 +13,7 @@ import {
   PointElement,
   LineElement
 } from 'chart.js';
+import ProgressBar from '../components/ProgressBar';
 
 ChartJS.register(
   ArcElement,
@@ -133,6 +134,7 @@ const Dashboard = () => {
               <th className="p-2">Entrepreneur</th>
               <th className="p-2">Action</th>
               <th className="p-2">Partner</th>
+              <th className="p-2">Progress</th>
             </tr>
           </thead>
           <tbody>
@@ -141,15 +143,16 @@ const Dashboard = () => {
                 <td className="p-2">
                   {e.created_at && !isNaN(new Date(e.created_at))
                     ? new Date(e.created_at).toLocaleDateString()
-                    : 'No date'}
+                    : '—'}
                 </td>
                 <td className="p-2 font-semibold">{e.name || '—'}</td>
                 <td className="p-2">
-                  <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
-                    Added
-                  </span>
+                  <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Added</span>
                 </td>
                 <td className="p-2">{e.referred || '—'}</td>
+                <td className="p-2">
+                  <ProgressBar currentStage={e.stage} />
+                </td>
               </tr>
             ))}
           </tbody>
