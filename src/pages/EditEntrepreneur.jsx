@@ -15,10 +15,8 @@ export default function EditEntrepreneur() {
     initials: '',
     notes: '',
     confirmed: false,
-    stage: 'Ideation',
+    stage: '', // 🟢 include stage in state
   });
-
-  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
 
   useEffect(() => {
     const fetchEntrepreneur = async () => {
@@ -45,22 +43,14 @@ export default function EditEntrepreneur() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleStageClick = (selectedStage) => {
-    setFormData((prev) => ({
-      ...prev,
-      stage: selectedStage,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { data, error } = await supabase
       .from('entrepreneurs')
       .update(formData)
@@ -70,11 +60,22 @@ export default function EditEntrepreneur() {
     if (error) {
       console.error('Update error:', error.message);
       alert(`Update failed: ${error.message}`);
+    } else if (!data || data.length === 0) {
+      alert('Update did not affect any records.');
     } else {
-      alert('Entrepreneur updated successfully!');
+      alert('Record updated successfully!');
       navigate('/entrepreneurs');
     }
   };
+
+  const handleStageChange = (newStage) => {
+    setFormData((prev) => ({
+      ...prev,
+      stage: newStage,
+    }));
+  };
+
+  const stageOptions = ['Ideation', 'Planning', 'Launch', 'Funding'];
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -144,8 +145,8 @@ export default function EditEntrepreneur() {
           placeholder="Notes"
           value={formData.notes}
           onChange={handleChange}
-          rows="4"
           className="w-full p-2 border rounded text-black"
+          rows="4"
         />
 
         <label className="flex items-center space-x-2 text-gray-800">
@@ -159,22 +160,25 @@ export default function EditEntrepreneur() {
           <span>Partner Confirmed</span>
         </label>
 
-        {/* Editable Stage Buttons */}
-        <div className="space-x-2 flex flex-wrap">
-          {stages.map((stage) => (
-            <button
-              key={stage}
-              type="button"
-              onClick={() => handleStageClick(stage)}
-              className={`px-3 py-1 rounded-full font-semibold transition text-sm ${
-                formData.stage === stage
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-500 text-white'
-              }`}
-            >
-              {stage}
-            </button>
-          ))}
+        {/* 🟢 Progress Stage Selection */}
+        <div className="space-y-2">
+          <p className="font-semibold">Business Stage:</p>
+          <div className="flex gap-2">
+            {stageOptions.map((stage) => (
+              <button
+                type="button"
+                key={stage}
+                onClick={() => handleStageChange(stage)}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  formData.stage === stage
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-300 text-black'
+                }`}
+              >
+                {stage}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
