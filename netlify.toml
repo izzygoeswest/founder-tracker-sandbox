@@ -1,2 +1,6 @@
-[functions]
-  directory = "functions"
+[build]
+  functions = "netlify/functions"
+  publish = "dist"
+
+[dev]
+  functions = "netlify/functions"
