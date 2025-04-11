@@ -39,6 +39,12 @@ const AddEntrepreneur = () => {
     }));
   };
 
+  console.log('Sending to Supabase:', {
+  ...formData,
+  user_id: user.id
+});
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
