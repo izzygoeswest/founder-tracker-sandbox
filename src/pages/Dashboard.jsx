@@ -1,31 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Bar, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  TimeScale,
-  PointElement,
-  LineElement
-} from 'chart.js';
-import ProgressBar from './ProgressBar'; // 👈 Import ProgressBar
 
-ChartJS.register(
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  TimeScale,
-  PointElement,
-  LineElement
-);
+const STAGES = ['Ideation', 'Planning', 'Launch', 'Funding'];
 
 const Dashboard = () => {
   const [entrepreneurs, setEntrepreneurs] = useState([]);
@@ -33,121 +9,59 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchEntrepreneurs = async () => {
       const { data, error } = await supabase.from('entrepreneurs').select('*');
-      if (!error) setEntrepreneurs(data);
+      if (error) {
+        console.error('Error fetching entrepreneurs:', error.message);
+      } else {
+        setEntrepreneurs(data);
+      }
     };
-
     fetchEntrepreneurs();
   }, []);
 
-  const totalEntrepreneurs = entrepreneurs.length;
-
-  const businessTypes = entrepreneurs.reduce((acc, e) => {
-    acc[e.type] = (acc[e.type] || 0) + 1;
-    return acc;
-  }, {});
-
-  const businessTypeStats = Object.entries(businessTypes).map(([type, count]) => ({
-    type,
-    percentage: ((count / totalEntrepreneurs) * 100).toFixed(0),
-  }));
-
-  const recentEntrepreneurs = [...entrepreneurs]
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 7);
-
-  const barData = {
-    labels: ['Monthly Trends'],
-    datasets: [
-      {
-        label: 'Monthly Trends',
-        data: [totalEntrepreneurs],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      },
-    ],
-  };
-
-  const pieData = {
-    labels: Object.keys(businessTypes),
-    datasets: [
-      {
-        label: 'Business Types',
-        data: Object.values(businessTypes),
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-        ],
-      },
-    ],
+  const renderStageButtons = (currentStage) => {
+    return STAGES.map((stage) => {
+      const isActive = stage === currentStage;
+      return (
+        <button
+          key={stage}
+          className={`px-2 py-1 rounded text-sm font-medium ${
+            isActive ? 'bg-green-500 text-white' : 'bg-gray-700 text-white'
+          }`}
+          disabled
+        >
+          {stage}
+        </button>
+      );
+    });
   };
 
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-sm font-semibold">Total Entrepreneurs</h2>
-          <p className="text-2xl">{totalEntrepreneurs}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-sm font-semibold">Business Types</h2>
-          <p className="text-sm">
-            {businessTypeStats.map((b, i) => `${b.percentage}% ${b.type}`).join(' • ')}
-          </p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-sm font-semibold">Recent Contacts</h2>
-          <p className="text-2xl">{recentEntrepreneurs.length}</p>
-          <p className="text-xs text-gray-400">Last 7 days</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-sm font-semibold">Partner Referrals</h2>
-          <p className="text-2xl">{totalEntrepreneurs}</p>
-          <p className="text-xs text-gray-400">This month</p>
-        </div>
-      </div>
-
-      <h2 className="text-lg font-semibold mb-2">Recent Activity</h2>
-      <div className="overflow-x-auto mb-6">
-        <table className="w-full text-left text-sm bg-gray-900 rounded">
-          <thead>
-            <tr className="bg-gray-800">
-              <th className="p-2">Date</th>
-              <th className="p-2">Entrepreneur</th>
-              <th className="p-2">Action</th>
-              <th className="p-2">Partner</th>
-              <th className="p-2">Progress</th> {/* 👈 New column */}
+    <div className="p-6 space-y-6">
+      <h2 className="text-2xl font-bold text-white">Recent Activity</h2>
+      <table className="w-full text-sm text-left text-white">
+        <thead className="bg-gray-800 text-white">
+          <tr>
+            <th className="px-4 py-2">Date</th>
+            <th className="px-4 py-2">Entrepreneur</th>
+            <th className="px-4 py-2">Action</th>
+            <th className="px-4 py-2">Partner</th>
+            <th className="px-4 py-2">Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entrepreneurs.map((e) => (
+            <tr key={e.id} className="border-t border-gray-700">
+              <td className="px-4 py-2">{new Date(e.created_at).toDateString()}</td>
+              <td className="px-4 py-2 font-semibold">{e.name}</td>
+              <td className="px-4 py-2">
+                <span className="bg-blue-500 text-white px-2 py-1 rounded">Added</span>
+              </td>
+              <td className="px-4 py-2">{e.referred}</td>
+              <td className="px-4 py-2 flex gap-1">{renderStageButtons(e.current_stage)}</td>
             </tr>
-          </thead>
-          <tbody>
-            {recentEntrepreneurs.map((e, i) => (
-              <tr key={i} className="border-t border-gray-700">
-                <td className="p-2">{new Date(e.created_at).toDateString()}</td>
-                <td className="p-2 font-semibold">{e.name}</td>
-                <td className="p-2">
-                  <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Added</span>
-                </td>
-                <td className="p-2">{e.referred}</td>
-                <td className="p-2">
-                  <ProgressBar currentStage={e.stage} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-900 p-4 rounded">
-          <h2 className="text-lg font-semibold mb-2">Monthly Trends</h2>
-          <Bar data={barData} />
-        </div>
-        <div className="bg-gray-900 p-4 rounded">
-          <h2 className="text-lg font-semibold mb-2">Business Type Distribution</h2>
-          <Pie data={pieData} />
-        </div>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
