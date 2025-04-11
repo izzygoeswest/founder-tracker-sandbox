@@ -15,7 +15,7 @@ export default function EditEntrepreneur() {
     initials: '',
     notes: '',
     confirmed: false,
-    stage: '', // Include stage
+    stage: '', // ✅ Add stage to state
   });
 
   useEffect(() => {
@@ -43,16 +43,9 @@ export default function EditEntrepreneur() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleStageClick = (selectedStage) => {
     setFormData((prev) => ({
       ...prev,
-      stage: selectedStage,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -78,50 +71,23 @@ export default function EditEntrepreneur() {
     }
   };
 
-  const STAGES = ['Ideation', 'Planning', 'Launch', 'Funding'];
-
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Edit Entrepreneur</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        />
-        <input
-          name="business"
-          placeholder="Business Name"
-          value={formData.business}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        />
-        <select
-          name="type"
-          value={formData.type}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        >
+        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="w-full p-2 border rounded text-black" />
+        <input name="business" placeholder="Business Name" value={formData.business} onChange={handleChange} className="w-full p-2 border rounded text-black" />
+
+        <select name="type" value={formData.type} onChange={handleChange} className="w-full p-2 border rounded text-black">
           <option value="">Select Business Type</option>
           <option value="Ideation">Ideation</option>
           <option value="Startup">Startup</option>
           <option value="Established">Established</option>
         </select>
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        />
-        <select
-          name="referred"
-          value={formData.referred}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        >
+
+        <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded text-black" />
+
+        <select name="referred" value={formData.referred} onChange={handleChange} className="w-full p-2 border rounded text-black">
           <option value="">Referred To</option>
           <option value="Go Topeka">Go Topeka</option>
           <option value="KS Department of Commerce">KS Department of Commerce</option>
@@ -130,45 +96,29 @@ export default function EditEntrepreneur() {
           <option value="Shawnee Startups">Shawnee Startups</option>
           <option value="Washburn SBDC">Washburn SBDC</option>
         </select>
-        <input
-          name="initials"
-          placeholder="Initials"
-          value={formData.initials}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-        />
-        <textarea
-          name="notes"
-          placeholder="Notes"
-          value={formData.notes}
-          onChange={handleChange}
-          className="w-full p-2 border rounded text-black"
-          rows="4"
-        />
 
-        {/* Stage Progress Buttons */}
-        <div className="space-y-2">
-          <label className="block text-white font-semibold">Progress Stage</label>
-          <div className="flex gap-2">
-            {STAGES.map((stage) => (
-              <button
-                key={stage}
-                type="button"
-                onClick={() => handleStageClick(stage)}
-                className={`px-3 py-1 rounded text-white ${
-                  formData.stage === stage
-                    ? 'bg-green-500'
-                    : 'bg-gray-600 hover:bg-gray-500'
-                }`}
-              >
-                {stage}
-              </button>
-            ))}
-          </div>
+        <input name="initials" placeholder="Initials" value={formData.initials} onChange={handleChange} className="w-full p-2 border rounded text-black" />
+
+        <textarea name="notes" placeholder="Notes" value={formData.notes} onChange={handleChange} className="w-full p-2 border rounded text-black" rows="4" />
+
+        {/* ✅ Add Stage Progress Buttons */}
+        <div className="space-x-2">
+          {['Ideation', 'Planning', 'Launch', 'Funding'].map((stage) => (
+            <button
+              type="button"
+              key={stage}
+              className={`px-4 py-2 rounded ${
+                formData.stage === stage ? 'bg-green-500 text-white' : 'bg-gray-600 text-white'
+              }`}
+              onClick={() => setFormData((prev) => ({ ...prev, stage }))}
+            >
+              {stage}
+            </button>
+          ))}
         </div>
 
-        {/* Partner Confirmed */}
-        <label className="flex items-center space-x-2 text-white">
+        {/* ✅ Make "Partner Confirmed" readable */}
+        <label className="flex items-center space-x-2 text-black">
           <input
             type="checkbox"
             name="confirmed"
@@ -176,13 +126,10 @@ export default function EditEntrepreneur() {
             onChange={handleChange}
             className="form-checkbox h-5 w-5"
           />
-          <span className="text-white">Partner Confirmed</span>
+          <span>Partner Confirmed</span>
         </label>
 
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
           Save
         </button>
       </form>
