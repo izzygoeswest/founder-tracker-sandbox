@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
@@ -16,7 +15,8 @@ const AddEntrepreneur = () => {
     referred: '',
     initials: '',
     confirmed: false,
-    notes: ''
+    notes: '',
+    stage: 'Ideation'
   });
 
   const resourcePartners = [
@@ -29,6 +29,7 @@ const AddEntrepreneur = () => {
   ];
 
   const businessTypes = ['Ideation', 'Startup', 'Established'];
+  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -109,6 +110,18 @@ const AddEntrepreneur = () => {
             <option key={partner} value={partner}>{partner}</option>
           ))}
         </select>
+        <select
+          name="stage"
+          value={formData.stage}
+          onChange={handleChange}
+          required
+          className="w-full p-2 rounded text-black"
+        >
+          <option value="">Select Stage</option>
+          {stages.map(stage => (
+            <option key={stage} value={stage}>{stage}</option>
+          ))}
+        </select>
         <input
           type="text"
           name="initials"
@@ -135,7 +148,7 @@ const AddEntrepreneur = () => {
           rows={4}
           className="w-full p-2 rounded text-black"
         />
-        <button type="submit" className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           Save Entrepreneur
         </button>
       </form>
