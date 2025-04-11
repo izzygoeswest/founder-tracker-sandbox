@@ -11,15 +11,15 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const token = uuidv4(); // Generate confirmation token
+    const token = uuidv4();
 
-    // Step 1: Sign up user via Supabase with correct redirect URL
+    // ✅ Include redirect URL here
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/confirm-email`
-      }
+        emailRedirectTo: 'https://whimsical-sprinkles-875551.netlify.app/confirm-email',
+      },
     });
 
     if (error) {
@@ -27,7 +27,7 @@ export default function Register() {
       return;
     }
 
-    // Step 2: Call Netlify function to send confirmation email
+    // ✅ Send custom confirmation email
     try {
       const response = await fetch('/.netlify/functions/send-confirmation-email', {
         method: 'POST',
@@ -38,7 +38,7 @@ export default function Register() {
       const result = await response.json();
       if (response.ok) {
         alert('Registration successful! Please check your email to confirm your registration.');
-        navigate('/login'); // ✅ Redirect to login page
+        navigate('/login');
       } else {
         console.error('Email send failed:', result);
         setErrorMsg('Registration succeeded but sending confirmation email failed.');
