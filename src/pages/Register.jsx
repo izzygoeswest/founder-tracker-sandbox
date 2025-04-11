@@ -1,81 +1,99 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useNavigate, Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
-const Register = () => {
+export default function Register() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const token = uuidv4(); // Generate confirmation token
 
-    const { user, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password
-    });
-
+    // Step 1: Sign up the user using Supabase Auth
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      alert(error.message);
-      setLoading(false);
-    } else {
-      // insert the user into the 'profiles' table (not 'users')
-      const { error: insertError } = await supabase.from('profiles').insert([
-        {
-          id: user?.id,
-          email: formData.email,
-          is_confirmed: false,
-          confirmation_token: ''
-        }
-      ]);
+      setErrorMsg(error.message);
+      return;
+    }
 
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        alert('Registration failed (insert issue).');
+    // ⛔️ NO NEED TO INSERT INTO `profiles` — Supabase does it automatically
+
+    // Step 2: Call Netlify function to send confirmation email
+    try {
+      const response = await fetch('/.netlify/functions/send-confirmation-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, token }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Registration successful! Please check your email to confirm your registration.');
+        navigate('/login'); // ✅ Redirect to login page
       } else {
-        alert('Check your email to confirm registration.');
-        navigate('/login');
+        console.error('Email send failed:', result);
+        setErrorMsg('Registration succeeded but sending confirmation email failed.');
       }
-
-      setLoading(false);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setErrorMsg('Registration succeeded, but an error occurred while sending confirmation email.');
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Register</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-          onChange={handleChange}
-          className="w-full p-2 rounded text-black"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          required
-          onChange={handleChange}
-          className="w-full p-2 rounded text-black"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 text-black px-4">
+      <div className="max-w-6xl w-full grid md:grid-cols-2 bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Left Section */}
+        <div className="bg-white p-10 space-y-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Founder Tracker
+          </h1>
+          <p className="text-gray-700">
+            A collaborative platform for resource partners to track entrepreneurs through their business journey.
+          </p>
+          <ul className="space-y-2 text-gray-700">
+            <li>✅ Track Entrepreneurial Progress</li>
+            <li>✅ Collaborate With Partners</li>
+            <li>✅ Analytics & Reports</li>
+          </ul>
+        </div>
+
+        {/* Right Section */}
+        <form onSubmit={handleRegister} className="bg-gray-100 p-10 space-y-4">
+          <h2 className="text-xl font-bold text-center text-gray-900">Register</h2>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded"
+            required
+          />
+          {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+          >
+            Register
+          </button>
+          <p className="text-center text-sm text-gray-500">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-500 hover:underline">Login here</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
-};
-
-export default Register;
+}
