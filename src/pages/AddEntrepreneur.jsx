@@ -39,23 +39,21 @@ const AddEntrepreneur = () => {
     }));
   };
 
-  console.log('Sending to Supabase:', {
-  ...formData,
-  user_id: user.id
-});
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { error } = await supabase.from('entrepreneurs').insert([
-      {
-        ...formData,
-        user_id: user.id
-      }
-    ]);
+    console.log('Sending to Supabase:', {
+      ...formData,
+      user_id: user.id
+    });
+
+    const { error } = await supabase
+      .from('entrepreneurs')
+      .insert([{ ...formData, user_id: user.id }])
+      .select(); // 🔥 Fix: avoids 400 error from columns mismatch
 
     if (error) {
+      console.error('Supabase insert error:', error);
       alert('Failed to save entrepreneur');
     } else {
       navigate('/entrepreneurs');
