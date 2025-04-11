@@ -6,7 +6,8 @@ export default function EditEntrepreneur() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // The keys here must exactly match your Supabase table columns:
+  const stages = ['Ideation', 'Planning', 'Launch', 'Funding'];
+
   const [formData, setFormData] = useState({
     name: '',
     business: '',
@@ -16,9 +17,9 @@ export default function EditEntrepreneur() {
     initials: '',
     notes: '',
     confirmed: false,
+    stage: 'Ideation'
   });
 
-  // Fetch the existing record on mount.
   useEffect(() => {
     const fetchEntrepreneur = async () => {
       const { data, error } = await supabase
@@ -31,7 +32,6 @@ export default function EditEntrepreneur() {
         console.error('Error loading entrepreneur:', error.message);
         alert('Failed to load entrepreneur.');
       } else if (data) {
-        // Format the date for the input if necessary.
         const formattedData = {
           ...data,
           date: data.date ? data.date.slice(0, 10) : '',
@@ -43,7 +43,6 @@ export default function EditEntrepreneur() {
     fetchEntrepreneur();
   }, [id]);
 
-  // Handle user input changes.
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
@@ -52,13 +51,16 @@ export default function EditEntrepreneur() {
     }));
   };
 
-  // Update the record in Supabase.
+  const handleStageClick = (selectedStage) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      stage: selectedStage,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('Submitting update:', formData);
-
-    // Adding .select() here forces Supabase to return the updated rows.
     const { data, error } = await supabase
       .from('entrepreneurs')
       .update(formData)
@@ -68,11 +70,7 @@ export default function EditEntrepreneur() {
     if (error) {
       console.error('Update error:', error.message);
       alert(`Update failed: ${error.message}`);
-    } else if (!data || data.length === 0) {
-      console.error('No rows updated.');
-      alert('Update did not affect any records.');
     } else {
-      console.log('Update successful:', data);
       alert('Record updated successfully!');
       navigate('/entrepreneurs');
     }
@@ -82,7 +80,6 @@ export default function EditEntrepreneur() {
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Edit Entrepreneur</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
         <input
           name="name"
           placeholder="Name"
@@ -91,7 +88,6 @@ export default function EditEntrepreneur() {
           className="w-full p-2 border rounded text-black"
         />
 
-        {/* Business Name */}
         <input
           name="business"
           placeholder="Business Name"
@@ -100,7 +96,6 @@ export default function EditEntrepreneur() {
           className="w-full p-2 border rounded text-black"
         />
 
-        {/* Business Type */}
         <select
           name="type"
           value={formData.type}
@@ -113,7 +108,6 @@ export default function EditEntrepreneur() {
           <option value="Established">Established</option>
         </select>
 
-        {/* Date */}
         <input
           type="date"
           name="date"
@@ -122,7 +116,6 @@ export default function EditEntrepreneur() {
           className="w-full p-2 border rounded text-black"
         />
 
-        {/* Referred To */}
         <select
           name="referred"
           value={formData.referred}
@@ -138,7 +131,6 @@ export default function EditEntrepreneur() {
           <option value="Washburn SBDC">Washburn SBDC</option>
         </select>
 
-        {/* Initials */}
         <input
           name="initials"
           placeholder="Initials"
@@ -147,7 +139,6 @@ export default function EditEntrepreneur() {
           className="w-full p-2 border rounded text-black"
         />
 
-        {/* Notes Field */}
         <textarea
           name="notes"
           placeholder="Notes"
@@ -168,6 +159,24 @@ export default function EditEntrepreneur() {
           />
           <span>Partner Confirmed</span>
         </label>
+
+        {/* Progress Tracker */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {stages.map((stage) => (
+            <button
+              type="button"
+              key={stage}
+              onClick={() => handleStageClick(stage)}
+              className={`px-2 py-1 rounded-full text-sm font-semibold transition ${
+                formData.stage === stage
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-600 text-gray-300'
+              }`}
+            >
+              {stage}
+            </button>
+          ))}
+        </div>
 
         <button
           type="submit"
