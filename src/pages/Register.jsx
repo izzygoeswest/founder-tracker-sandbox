@@ -11,29 +11,31 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const token = uuidv4(); // Generate confirmation token
+    const token = uuidv4();
 
-    // Step 1: Register the user in Supabase Auth
+    // Step 1: Register the user
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       setErrorMsg(error.message);
       return;
     }
 
-    const userId = data?.user?.id || data?.session?.user?.id;
+    const userId = data?.user?.id || data?.user?.id; // Supabase may nest this differently depending on version
 
-    // Step 2: Insert profile into the 'profiles' table
-    const { error: profileError } = await supabase.from('profiles').insert([
-      {
-        id: userId,
-        email,
-        is_confirmed: false,
-        confirmation_token: token
-      }
-    ]);
+    // Step 2: Insert into 'profiles' table
+    const { error: insertError } = await supabase
+      .from('profiles')
+      .insert([
+        {
+          id: userId, // Make sure this matches the authenticated user
+          email,
+          is_confirmed: false,
+          confirmation_token: token,
+        },
+      ]);
 
-    if (profileError) {
-      setErrorMsg(profileError.message);
+    if (insertError) {
+      setErrorMsg(`Insert error: ${insertError.message}`);
       return;
     }
 
@@ -42,40 +44,38 @@ export default function Register() {
       const response = await fetch('/.netlify/functions/send-confirmation-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, token })
+        body: JSON.stringify({ email, token }),
       });
 
       const result = await response.json();
       if (response.ok) {
-        alert('Registration successful! Check your email to confirm.');
+        alert('Registration successful! Please check your email to confirm.');
         navigate('/login');
       } else {
-        console.error('Email error:', result);
-        setErrorMsg('Registered, but email failed.');
+        console.error('Email send failed:', result);
+        setErrorMsg('Registration succeeded but sending confirmation email failed.');
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setErrorMsg('Registered, but could not send confirmation email.');
+      console.error('Email fetch error:', err);
+      setErrorMsg('Something went wrong sending confirmation email.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 text-black px-4">
       <div className="max-w-6xl w-full grid md:grid-cols-2 bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Left */}
         <div className="bg-white p-10 space-y-6">
           <h1 className="text-2xl font-bold text-gray-900">Founder Tracker</h1>
           <p className="text-gray-700">
-            A collaborative platform to track entrepreneurs on their journey.
+            A collaborative platform for resource partners to track entrepreneurs through their business journey.
           </p>
           <ul className="space-y-2 text-gray-700">
-            <li>✅ Track Progress</li>
-            <li>✅ Collaborate</li>
-            <li>✅ Analytics</li>
+            <li>✅ Track Entrepreneurial Progress</li>
+            <li>✅ Collaborate With Partners</li>
+            <li>✅ Analytics & Reports</li>
           </ul>
         </div>
 
-        {/* Right */}
         <form onSubmit={handleRegister} className="bg-gray-100 p-10 space-y-4">
           <h2 className="text-xl font-bold text-center text-gray-900">Register</h2>
           <input
@@ -97,15 +97,13 @@ export default function Register() {
           {errorMsg && <p className="text-red-500 text-sm">{errorMsg}</p>}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
           >
             Register
           </button>
           <p className="text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-500 hover:underline">
-              Login here
-            </Link>
+            <Link to="/login" className="text-blue-500 hover:underline">Login here</Link>
           </p>
         </form>
       </div>
