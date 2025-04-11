@@ -13,14 +13,19 @@ export default function Register() {
     e.preventDefault();
     const token = uuidv4(); // Generate confirmation token
 
-    // Step 1: Sign up the user using Supabase Auth
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Step 1: Sign up user via Supabase with correct redirect URL
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/confirm-email`
+      }
+    });
+
     if (error) {
       setErrorMsg(error.message);
       return;
     }
-
-    // ⛔️ NO NEED TO INSERT INTO `profiles` — Supabase does it automatically
 
     // Step 2: Call Netlify function to send confirmation email
     try {
