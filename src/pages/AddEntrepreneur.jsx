@@ -49,8 +49,7 @@ const AddEntrepreneur = () => {
 
     const { error } = await supabase
       .from('entrepreneurs')
-      .insert([{ ...formData, user_id: user.id }])
-      .select(); // 🔥 Fix: avoids 400 error from columns mismatch
+      .insert([{ ...formData, user_id: user.id }]); // ❌ Removed .select() to fix 400 error
 
     if (error) {
       console.error('Supabase insert error:', error);
