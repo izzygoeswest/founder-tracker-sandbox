@@ -147,6 +147,23 @@ const AddEntrepreneur = () => {
           rows={4}
           className="w-full p-2 rounded text-black"
         />
+        
+        <div className="space-y-2">
+          <label className="block font-medium">Stage</label>
+          <div className="flex space-x-2">
+            {stages.map((stage) => (
+              <button
+                key={stage}
+                type="button"
+                onClick={() => setFormData({ ...formData, stage })}
+                className={\`px-3 py-1 rounded \${formData.stage === stage ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}\`}
+              >
+                {stage}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           Save Entrepreneur
         </button>
