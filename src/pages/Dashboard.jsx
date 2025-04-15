@@ -46,6 +46,20 @@ export default function Dashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchEntrepreneurs(); // Refresh when user returns to tab
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   const total = entrepreneurs.length;
 
   const typeCounts = entrepreneurs.reduce((acc, curr) => {
@@ -85,7 +99,7 @@ export default function Dashboard() {
         <p>Loading...</p>
       ) : (
         <>
-          {/* Top Summary Boxes */}
+          {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gray-800 p-4 rounded shadow">
               <h2 className="text-lg font-bold">Total Entrepreneurs</h2>
@@ -140,7 +154,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Monthly Trends Bar Chart */}
+          {/* Monthly Trends */}
           <div className="bg-gray-800 p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Monthly Trends</h2>
             <ResponsiveContainer width="100%" height={300}>
@@ -154,7 +168,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Business Type Distribution Pie Chart */}
+          {/* Business Type Distribution */}
           <div className="bg-gray-800 p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Business Type Distribution</h2>
             <ResponsiveContainer width="100%" height={300}>
