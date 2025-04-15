@@ -156,7 +156,12 @@ const AddEntrepreneur = () => {
                 key={stage}
                 type="button"
                 onClick={() => setFormData({ ...formData, stage })}
-                className={\`px-3 py-1 rounded \${formData.stage === stage ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}\`}
+                className={
+                  'px-3 py-1 rounded ' +
+                  (formData.stage === stage
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 text-gray-700')
+                }
               >
                 {stage}
               </button>
