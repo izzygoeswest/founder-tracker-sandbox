@@ -158,13 +158,18 @@ export default function Dashboard() {
           <div className="bg-gray-800 p-4 rounded shadow">
             <h2 className="text-lg font-bold mb-4">Monthly Trends</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={trends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" />
-              </BarChart>
+           <BarChart data={trends}>
+  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+  <XAxis dataKey="name" stroke="#ccc" />
+  <YAxis stroke="#ccc" />
+  <Tooltip
+    contentStyle={{ backgroundColor: '#2d2d2d', borderColor: '#444' }}
+    labelStyle={{ color: '#fff' }}
+    itemStyle={{ color: '#fff' }}
+  />
+  <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+</BarChart>
+
             </ResponsiveContainer>
           </div>
 
