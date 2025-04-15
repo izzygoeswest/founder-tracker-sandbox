@@ -29,6 +29,22 @@ const Entrepreneurs = () => {
     };
 
     fetchEntrepreneurs();
+
+    const channel = supabase
+      .channel('realtime-entrepreneurs')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'entrepreneurs' },
+        (payload) => {
+          console.log('Entrepreneurs change detected:', payload);
+          fetchEntrepreneurs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const filtered = entrepreneurs.filter((e) =>
