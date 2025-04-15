@@ -28,6 +28,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchEntrepreneurs();
+
+    const channel = supabase
+      .channel('realtime-dashboard')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'entrepreneurs' },
+        (payload) => {
+          console.log('Dashboard change detected:', payload);
+          fetchEntrepreneurs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const total = entrepreneurs.length;
