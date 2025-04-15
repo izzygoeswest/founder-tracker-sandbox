@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaTrash, FaEdit } from 'react-icons/fa';
+import ProgressBar from '../components/ProgressBar';
 import * as XLSX from 'xlsx';
 import { useAuth } from '../auth';
 
@@ -127,6 +128,7 @@ const Entrepreneurs = () => {
               <th className="p-2">Referred To</th>
               <th className="p-2">Initials</th>
               <th className="p-2">Partner Confirmed</th>
+<th className="p-2">Stage</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
@@ -151,6 +153,7 @@ const Entrepreneurs = () => {
                     className="form-checkbox h-5 w-5 text-blue-500"
                   />
                 </td>
+                <td className="p-2"><ProgressBar currentStage={e.stage} /></td>
                 <td className="p-2 flex space-x-2">
                   <button onClick={() => navigate(`/edit/${e.id}`)}>
                     <FaEdit />
